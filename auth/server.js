@@ -1,19 +1,45 @@
 const express = require('express');
 const app = express();
+const { MongoClient, ServerApiVersion } = require('mongodb');
+const uri = "mongodb+srv://pi:678041577pP_p1h2g3pablo@cluster0.maizixh.mongodb.net/?retryWrites=true&w=majority";
 
 app.use(express.urlencoded());
 
-app.post("/auth", function (req, res) {
-  /* This server is only available to nginx */
-  const streamkey = req.body.key;
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
 
-  /* You can make a database of users instead :) */
-  if (streamkey === "supersecret") {
+let collection = "";
+
+async function connect(){
+  try {
+    await client.connect();
+    console.log("Conectado a la base de datos");
+  }
+  catch (err) {
+    console.log(err.stack);
+  }
+
+  collection = client.db("FULL").collection("users");
+}
+
+connect();
+
+app.post("/auth", async function (req, res) {
+  const streamkey = req.body.key;
+  const username = req.body.username;
+
+  const userStreamkey = await collection.findOne({username: username});
+
+  if (streamkey === userStreamkey.streamKey) {
     res.status(200).send();
     return;
   }
 
-  /* Reject the stream */
   res.status(403).send();
 });
 
