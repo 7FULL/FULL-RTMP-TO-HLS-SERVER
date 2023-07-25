@@ -15,6 +15,8 @@ const client = new MongoClient(uri, {
 
 let collection = "";
 
+let db = "";
+
 async function connect(){
   try {
     await client.connect();
@@ -24,6 +26,8 @@ async function connect(){
     console.log(err.stack);
   }
 
+  db = client.db("FULL");
+
   collection = client.db("FULL").collection("users");
 }
 
@@ -32,17 +36,25 @@ connect();
 app.post("/auth", async function (req, res) {
   const streamkey = req.body.key;
   const username = req.body.username;
+  const name = req.body.name;
 
+try {
   const userStreamkey = await collection.findOne({username: username});
 
   if (streamkey === userStreamkey.streamKey) {
+    await db.collection("streams").insertOne({username: username, name: name});
+
     res.status(200).send();
     return;
   }
+}
+catch (err) {
+  console.log(err.stack);
+}
 
   res.status(403).send();
 });
 
 app.listen(8000, function () {
-  console.log("Listening on port 8000!");
+  console.log("Escuchando en el puerto 8000");
 });
