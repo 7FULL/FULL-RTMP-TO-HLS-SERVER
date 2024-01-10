@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://pi:678041577pP_p1h2g3pablo@cluster0.maizixh.mongodb.net/?retryWrites=true&w=majority";
+const uri = "mongodb+srv://fullglobaltech:gbjY7H9OD8Kjh8cE@full.wn7m584.mongodb.net/?retryWrites=true&w=majority";
 
 app.use(express.urlencoded());
 
@@ -28,7 +28,7 @@ async function connect(){
 
   db = client.db("FULL");
 
-  collection = client.db("FULL").collection("users");
+  collection = client.db("FULL").collection("User");
 }
 
 connect();
@@ -36,14 +36,11 @@ connect();
 app.post("/auth", async function (req, res) {
   const streamkey = req.body.key;
   const username = req.body.username;
-  const name = req.body.name;
-
+  
 try {
-  const userStreamkey = await collection.findOne({username: username});
+  const userStreamkey = await collection.findOne({user: username});
 
   if (streamkey === userStreamkey.streamKey) {
-    await db.collection("streams").insertOne({username: username, name: name});
-
     res.status(200).send();
     return;
   }
@@ -58,3 +55,7 @@ catch (err) {
 app.listen(8000, function () {
   console.log("Escuchando en el puerto 8000");
 });
+
+
+//Para que estp funcione docker-compose build
+//Y luego docker-compose up varias veces y ya va
